@@ -1,0 +1,27 @@
+---
+
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "${{ github.head_ref }}"
+
+      - name: Dump envs
+        run: env | sort
