@@ -5,8 +5,7 @@ name: CI
 on:
   pull_request:
     types:
-      - opened
-      - synchronize
+      - closed
     branches:
       - master
       - main
@@ -15,13 +14,26 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: "${{ github.head_ref }}"
 
-      - name: Dump envs
+      - name: dump envs
         run: env | sort
+
+      - name: git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git symbolic-ref --short HEAD || git fetch --depth=1
+          git checkout "${{ github.head_ref }}"
+
+      - name: run a script
+        run: |
+          date > generated.txt
+          git add generated.txt
+          git commit -m "generated $GITHUB_RUN_ID"
+          git push
